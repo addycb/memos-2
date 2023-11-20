@@ -17,3 +17,4 @@ myswitch:
     popw %ds 
     popal
     popfl
+    ret
