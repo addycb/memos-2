@@ -36,18 +36,8 @@ _start:
 	.long 0xE4524FFB /* Checksum */
 
 real_start:
+	lgdt gdt_ptr
+	ljmp $0x08, $1f
 	
-	/* set up stack */
-	movl $stack+0x1000, %esp /* setup 4Kbyte stack */
-	
-	/* save multiboot parameter, for eventual call to C code */
-	pushl %ebx
-
-	call init /* start of C code */
-
-	/* In case we return from the call, we want to suspend the processor */
-	
-	cli
-	hlt
 loop:
 	jmp loop
