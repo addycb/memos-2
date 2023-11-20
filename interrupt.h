@@ -161,12 +161,18 @@ uint16_t pic_get_isr(void)
 void dummyhandler(){
     return;
 }
-
-void timerhandler(){
+void scheduler(){
     return;
 }
 
+void timerhandler(){
+    /*Timer handler*/
+    outb(PIC1,PIC1_CMD);
+    scheduler();
+}
+
 void init_idt(){
+    /*Initiailize IDT, add PIC and Timer*/
     /*First 32 reserved (by intel) interrupts redirect to dummy function*/
     for(int i=0;i<32;i++){
         IDT[i].isr_low = (uint16_t)(((uint32_t)dummyhandler)&0xffff);
@@ -184,7 +190,7 @@ void init_idt(){
     __asm__ __volatile__ ("lidt %0" :: "m"((uint64_t)((uint32_t)IDT)<<16|263));
     /*Remap IRQS*/
     __asm__ __volatile__("cli");
-    PIC_remap(0x20,0x28);
+    PIC_remap(PIC1,0x28);
     uint16_t hz = 1193180/100;
     outb(0x43,0x34);
     outb(0x40,hz&0xFF);
