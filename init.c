@@ -1,6 +1,8 @@
 #include "multiboot.h"
 #include "types.h"
-#define NUMTHREADS 3 
+#define NUMTHREADS 3 //number of threads to create
+
+
 /* Hardware text mode color constants. */
 enum vga_color
 {
@@ -144,40 +146,31 @@ void itoa (char *buf, int base, int d)
 }
 
 
-void init( multiboot* pmb ) {
 
-   memory_map_t *mmap;
-   unsigned int memsz = 0;		/* Memory size in MB */
-   static char memstr[10];
+//create tcb
 
-  for (mmap = (memory_map_t *) pmb->mmap_addr;
-       (unsigned long) mmap < pmb->mmap_addr + pmb->mmap_length;
-       mmap = (memory_map_t *) ((unsigned long) mmap
-				+ mmap->size + 4 /*sizeof (mmap->size)*/)) {
-    
-    if (mmap->type == 1)	/* Available RAM -- see 'info multiboot' */
-      memsz += mmap->length_low;
+
+
+void threadfunc(x)
+/* This function is the func that does work inside of the thread. */{
+  char* buf;
+  itoa(buf,10,x);
+  for(int i=0;i<3;i++){
+  terminal_writestring(x);
+
   }
+}
 
-  /* Convert memsz to MBs */
-  memsz = (memsz >> 20) + 1;	/* The + 1 accounts for rounding
-				   errors to the nearest MB that are
-				   in the machine, because some of the
-				   memory is othrwise allocated to
-				   multiboot data structures, the
-				   kernel image, or is reserved (e.g.,
-				   for the BIOS). This guarantees we
-				   see the same memory output as
-				   specified to QEMU.
-				    */
 
-  itoa(memstr, 'd', memsz);
 
+
+void init( multiboot* pmb ) {
   terminal_initialize();
-
-  terminal_writestring("MemOS: Welcome *** System memory is: ");
-  terminal_writestring(memstr);
-  terminal_writestring("MB");
+   initTCBArray();
+  createThreads();  
+  init_idt();
+  
+   
 
 
 
