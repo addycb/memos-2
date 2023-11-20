@@ -185,6 +185,10 @@ void init_idt(){
     /*Remap IRQS*/
     __asm__ __volatile__("cli");
     PIC_remap(0x20,0x28);
+    uint16_t hz = 1193180/100;
+    outb(0x43,0x34);
+    outb(0x40,hz&0xFF);
+    outb(0x40,hz>>8);
     __asm__ __volatile__ ("sti");
     return;
 }
