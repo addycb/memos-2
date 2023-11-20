@@ -167,7 +167,7 @@ void timerhandler(){
 }
 
 void init_idt(){
-    /*First 31 reserved interrupts redirect to dummy function*/
+    /*First 32 reserved interrupts redirect to dummy function*/
     for(int i=0;i<32;i++){
         IDT[i].isr_low = (uint16_t)(((uint32_t)dummyhandler)&0xffff);
         IDT[i].kernel_cs = 0x08;
@@ -175,6 +175,7 @@ void init_idt(){
         IDT[i].attributes = 0x8e;
         IDT[i].isr_high = (uint16_t)((((uint32_t)dummyhandler)>>16)&0xffff);
     }
+    /* Interrupt 33 is timer handler function*/ 
     IDT[32].isr_low = (uint16_t)(((uint32_t)timerhandler)&0xffff);
     IDT[32].kernel_cs = 0x08;
     IDT[32].reserved = 0;
@@ -182,7 +183,7 @@ void init_idt(){
     IDT[32].isr_high = (uint16_t)((((uint32_t)timerhandler)>>16)&0xffff);
     __asm__ __volatile__ ("lidt %0" :: "m"((uint64_t)((uint32_t)IDT)<<16|263));
 }
-    
+
 
 
 
