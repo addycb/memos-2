@@ -158,7 +158,31 @@ uint16_t pic_get_isr(void)
 {
     return __pic_get_irq_reg(PIC_READ_ISR);
 }
+void dummyhandler(){
+    return;
+}
 
+void timerhandler(){
+    return;
+}
+
+void init_idt(){
+    /*First 31 reserved interrupts redirect to dummy function*/
+    for(int i=0;i<32;i++){
+        IDT[i].isr_low = (uint16_t)(((uint32_t)dummyhandler)&0xffff);
+        IDT[i].kernel_cs = 0x08;
+        IDT[i].reserved = 0;
+        IDT[i].attributes = 0x8e;
+        IDT[i].isr_high = (uint16_t)((((uint32_t)dummyhandler)>>16)&0xffff);
+    }
+    IDT[32].isr_low = (uint16_t)(((uint32_t)timerhandler)&0xffff);
+    IDT[32].kernel_cs = 0x08;
+    IDT[32].reserved = 0;
+    IDT[32].attributes = 0x8e;
+    IDT[32].isr_high = (uint16_t)((((uint32_t)timerhandler)>>16)&0xffff);
+    __asm__ __volatile__ ("lidt %0" :: "m"((uint64_t)((uint32_t)IDT)<<16|263));
+}
+    
 
 
 
