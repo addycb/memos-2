@@ -167,7 +167,7 @@ void timerhandler(){
 }
 
 void init_idt(){
-    /*First 32 reserved interrupts redirect to dummy function*/
+    /*First 32 reserved (by intel) interrupts redirect to dummy function*/
     for(int i=0;i<32;i++){
         IDT[i].isr_low = (uint16_t)(((uint32_t)dummyhandler)&0xffff);
         IDT[i].kernel_cs = 0x08;
@@ -182,6 +182,11 @@ void init_idt(){
     IDT[32].attributes = 0x8e;
     IDT[32].isr_high = (uint16_t)((((uint32_t)timerhandler)>>16)&0xffff);
     __asm__ __volatile__ ("lidt %0" :: "m"((uint64_t)((uint32_t)IDT)<<16|263));
+    /*Remap IRQS*/
+    __asm__ __volatile__("cli");
+    PIC_remap(0x20,0x28);
+    __asm__ __volatile__ ("sti");
+    return;
 }
 
 
